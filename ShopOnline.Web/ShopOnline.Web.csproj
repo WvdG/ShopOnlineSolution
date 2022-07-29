@@ -21,4 +21,8 @@
     <ProjectReference Include="..\ShopOnline.Models\ShopOnline.Models.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\Images\Glasmozaiek\" />
+  </ItemGroup>
+
 </Project>
