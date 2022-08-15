@@ -11,7 +11,7 @@ else if (ErrorMessage != null)
 }
 else
 {
-    <h3 class="mb-5">Shopping Cart</h3>
+    <h3 class="mb-5">Winkelwagen</h3>
     @if(ShoppingCartItems.Count() > 0)
     {
       <div class = "row mb-5">
@@ -43,11 +43,11 @@ else
             }
         </div>
         <div class="col-md-3">
-            <h5>Cart Summary</h5>
+            <h5>Winkelwagen overzicht</h5>
             <div class="mt-2">
                 <div>Total - (@TotalQuantity items)&nbsp;<b>@TotalPrice</b></div>
                 <a href="Checkout" class="btn btn-success">
-                    <span class="oi oi-credit-card"></span>&nbsp; Proceed to Checkout 
+                    <span class="oi oi-credit-card"></span>&nbsp; Ga naar winkelwagen 
                 </a>
             </div>
         </div>
@@ -55,7 +55,7 @@ else
     }
     else
     {
-        <h4>There are currently no items in your shopping cart</h4>
+        <h4>Er zitten op dit moment geen items in uw winkelwagen</h4>
     }
 
 }
