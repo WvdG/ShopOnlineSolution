@@ -22,7 +22,7 @@ namespace ShopOnline.Api.Controllers
         {
             try
             {
-                var products = await this.productRepository.GetItems();
+                var products = await productRepository.GetItems();
 
 
                 if (products == null)

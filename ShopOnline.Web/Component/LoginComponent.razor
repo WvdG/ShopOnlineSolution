@@ -1,0 +1,53 @@
+﻿@using ShopOnline.Api.Services
+
+@
+@inject IAuthenticationService AuthService
+
+<form>
+    <label for="username">Username:</label>
+    <input type="text" id="username" @bind="@Username" />
+    <br />
+    <label for="password">Password:</label>
+    <input type="password" id="password" @bind="@Password" />
+    <br />
+    <button type="button" @onclick="@HandleLogin">Login</button>
+</form>
+
+@if (!string.IsNullOrEmpty(Message))
+{
+    <p>@Message</p>
+}
+
+@code {
+    private string Username { get; set; }
+    private string Password { get; set; }
+    private string Message { get; set; }
+
+    private async Task HandleLogin()
+    {
+        // Perform validation checks on the entered username and password
+        if (string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(Password))
+        {            
+            Message = "Please enter a valid username and password.";
+            return;
+        }
+
+        // Attempt to log the user in
+        var isAuthenticated = await AuthService.Authenticate(Username, Password);
+
+        // Attempt to log the user in
+        // Note: You will need to have a method for authenticating the user, such as a web service call or database query
+        // For example:
+        // var isAuthenticated = await MyAuthService.Authenticate(Username, Password);
+
+        // If the login is successful, navigate to the protected page
+        if (isAuthenticated)
+        {
+            //NavigationManager.NavigateTo("/protected");
+        }
+        else
+        {
+            Message = "Invalid username or password.";
+        }
+    }
+}
