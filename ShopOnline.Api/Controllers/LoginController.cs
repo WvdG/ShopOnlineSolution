@@ -1,8 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ShopOnline.Api.Repositories.Contracts;
+using ShopOnline.Models.Dtos;
 
 namespace ShopOnline.Api.Controllers;
-public class LoginController
+
+[Route("api/[controller]")]
+[ApiController]
+public class LoginController : ControllerBase
 {
     private readonly IUserRepository userRepository;
 
@@ -12,8 +16,13 @@ public class LoginController
     }
 
     [HttpPost]
-    public async Task<ActionResult<bool>> Authenticate([FromBody] string username, [FromBody] string password)
+    [Route(nameof(Authenticate))]
+    public async Task<ActionResult<bool>> Authenticate([FromBody] LoginDto loginDto)
     {
-        return await userRepository.Authenticate(username, password);
+        //await userRepository.AddUser(loginDto.Username, loginDto.Password);
+
+        // user/pwd => allebei admin gebruiken.
+
+        return await userRepository.Authenticate(loginDto.Username, loginDto.Password);
     }
 }

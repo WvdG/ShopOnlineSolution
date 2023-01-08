@@ -29,32 +29,26 @@ namespace ShopOnline.Api.Data
 			
 
 			//Add users
-			modelBuilder.Entity<User>().HasData(new User
-			{
-				Id = 1,
-				UserName = "Bob"
+			//modelBuilder.Entity<User>().HasData(new User
+			//{
+			//	Id = 1,
+			//	UserName = "Admin"
 
-			});
-			modelBuilder.Entity<User>().HasData(new User
-			{
-				Id = 2,
-				UserName = "Sarah"
-
-			});
+			//});
 
 			//Create Shopping Cart for Users
-			modelBuilder.Entity<Cart>().HasData(new Cart
-			{
-				Id = 1,
-				UserId = 1
+			//modelBuilder.Entity<Cart>().HasData(new Cart
+			//{
+			//	Id = 1,
+			//	UserId = 1
 
-			});
-			modelBuilder.Entity<Cart>().HasData(new Cart
-			{
-				Id = 2,
-				UserId = 2
+			//});
+			//modelBuilder.Entity<Cart>().HasData(new Cart
+			//{
+			//	Id = 2,
+			//	UserId = 2
 
-			});
+			//});
 			//Add Product Categories
 			modelBuilder.Entity<ProductCategory>().HasData(new ProductCategory
 			{

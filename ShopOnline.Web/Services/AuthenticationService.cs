@@ -19,7 +19,7 @@ public class AuthenticationService : IAuthenticationService
         loginDto.Username = username;
         loginDto.Password = password;
 
-        var response = await httpClient.PostAsJsonAsync<LoginDto>("api/Login", loginDto);
+        var response = await httpClient.PostAsJsonAsync("api/Login/Authenticate", loginDto);
 
         if (response.IsSuccessStatusCode)
         {

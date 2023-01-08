@@ -1,6 +1,5 @@
 ﻿@using ShopOnline.Api.Services
 
-@
 @inject IAuthenticationService AuthService
 
 <form>
@@ -43,6 +42,8 @@
         // If the login is successful, navigate to the protected page
         if (isAuthenticated)
         {
+            Message = "Login succesfull.";
+            return;
             //NavigationManager.NavigateTo("/protected");
         }
         else

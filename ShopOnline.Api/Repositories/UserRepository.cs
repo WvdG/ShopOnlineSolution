@@ -1,46 +1,50 @@
 ﻿using Microsoft.Data.SqlClient;
+using ShopOnline.Api.Data;
 using ShopOnline.Api.Repositories.Contracts;
 using System.Security.Cryptography;
 
 namespace ShopOnline.Api.Repositories;
 public class UserRepository : IUserRepository
 {
-    private readonly string _connectionString;
+    private readonly ShopOnlineDbContext shopOnlineDbContext;
 
-    public UserRepository(string connectionString)
+    public UserRepository(ShopOnlineDbContext shopOnlineDbContext)
     {
-        _connectionString = connectionString;
+        this.shopOnlineDbContext = shopOnlineDbContext;
     }
+
+    public async Task AddUser(string username, string password)
+    {
+        byte[] salt = new byte[16];
+        using (var rng = new RNGCryptoServiceProvider())
+        {
+            rng.GetBytes(salt);
+        }
+
+        byte[] passwordHash = HashPassword(password, salt);
+
+        var user = new Entities.User();
+        user.UserName = username;
+        user.PasswordSalt = salt;
+        user.PasswordHash = passwordHash;
+
+        await this.shopOnlineDbContext.Users.AddAsync(user);
+        
+        await this.shopOnlineDbContext.SaveChangesAsync();
+    }
+
     public async Task<bool> Authenticate(string username, string password)
     {
-        // Connect to the database
-        using (var connection = new SqlConnection(_connectionString))
-        {
-            await connection.OpenAsync();
+        var user = shopOnlineDbContext.Users.SingleOrDefault(x => x.UserName == username);
 
-            // Retrieve the user's password hash and salt from the database
-            var command = new SqlCommand("SELECT PasswordHash, PasswordSalt FROM Users WHERE Username = @Username", connection);
-            command.Parameters.AddWithValue("@Username", username);
+        if (user == null)
+            return false;
 
-            using (var reader = await command.ExecuteReaderAsync())
-            {
-                if (!reader.Read())
-                {
-                    // No matching user was found
-                    return false;
-                }
+        // Hash the entered password using the retrieved salt
+        var enteredPasswordHash = HashPassword(password, user.PasswordSalt);
 
-                // Retrieve the password hash and salt from the database
-                var passwordHash = (byte[])reader["PasswordHash"];
-                var passwordSalt = (byte[])reader["PasswordSalt"];
-
-                // Hash the entered password using the retrieved salt
-                var enteredPasswordHash = HashPassword(password, passwordSalt);
-
-                // Compare the entered password hash with the stored password hash
-                return enteredPasswordHash.SequenceEqual(passwordHash);
-            }
-        }
+        // Compare the entered password hash with the stored password hash
+        return enteredPasswordHash.SequenceEqual(user.PasswordHash);
     }
 
     private byte[] HashPassword(string password, byte[] salt)
