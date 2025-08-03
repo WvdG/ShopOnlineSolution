@@ -1,6 +1,7 @@
 ﻿@using ShopOnline.Api.Services
 
 @inject IAuthenticationService AuthService
+@inject NavigationManager Navigation
 
 <form>
     <label for="username">Username:</label>
@@ -14,7 +15,9 @@
 
 @if (!string.IsNullOrEmpty(Message))
 {
-    <p>@Message</p>
+    <div class="alert alert-danger" role="alert">
+        @Message
+    </div>
 }
 
 @code {
@@ -24,31 +27,23 @@
 
     private async Task HandleLogin()
     {
-        // Perform validation checks on the entered username and password
+        Message = string.Empty;
+
         if (string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(Password))
         {            
-            Message = "Please enter a valid username and password.";
+            Message = "Vul een geldige gebruikersnaam en wachtwoord in.";
             return;
         }
 
-        // Attempt to log the user in
         var isAuthenticated = await AuthService.Authenticate(Username, Password);
 
-        // Attempt to log the user in
-        // Note: You will need to have a method for authenticating the user, such as a web service call or database query
-        // For example:
-        // var isAuthenticated = await MyAuthService.Authenticate(Username, Password);
-
-        // If the login is successful, navigate to the protected page
         if (isAuthenticated)
         {
-            Message = "Login succesfull.";
-            return;
-            //NavigationManager.NavigateTo("/protected");
+            Navigation.NavigateTo("/upload-schilderij");
         }
         else
         {
-            Message = "Invalid username or password.";
+            Message = "Ongeldige gebruikersnaam of wachtwoord.";
         }
     }
 }

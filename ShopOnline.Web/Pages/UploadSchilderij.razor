@@ -1,0 +1,96 @@
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Authorization
+@using System.ComponentModel.DataAnnotations
+
+@page "/upload-schilderij"
+@inject NavigationManager Navigation
+@inject HttpClient Http
+
+<h3>Schilderij uploaden</h3>
+
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="alert alert-danger">@ErrorMessage</div>
+}
+@if (!string.IsNullOrEmpty(SuccessMessage))
+{
+    <div class="alert alert-success">@SuccessMessage</div>
+}
+
+<EditForm Model="@model" OnValidSubmit="HandleUpload">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label for="name">Naam schilderij</label>
+        <InputText id="name" class="form-control" @bind-Value="model.Name" />
+    </div>
+    <div class="mb-3">
+        <label for="description">Beschrijving</label>
+        <InputText id="description" class="form-control" @bind-Value="model.Description" />
+    </div>
+    <div class="mb-3">
+        <label for="price">Prijs</label>
+        <InputNumber id="price" class="form-control" @bind-Value="model.Price" />
+    </div>
+    <div class="mb-3">
+        <label for="image">Afbeelding</label>
+        <InputFile OnChange="HandleFileSelected" />
+    </div>
+    <button type="submit" class="btn btn-primary">Uploaden</button>
+</EditForm>
+
+@code {
+    private ProductUploadModel model = new();
+    private IBrowserFile? selectedFile;
+    private string? ErrorMessage;
+    private string? SuccessMessage;
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+    }
+
+    private async Task HandleUpload()
+    {
+        ErrorMessage = null;
+        SuccessMessage = null;
+
+        if (selectedFile == null)
+        {
+            ErrorMessage = "Selecteer een afbeelding.";
+            return;
+        }
+
+        // Upload image
+        var content = new MultipartFormDataContent();
+        var stream = selectedFile.OpenReadStream(10 * 1024 * 1024); // max 10MB
+        content.Add(new StreamContent(stream), "image", selectedFile.Name);
+        content.Add(new StringContent(model.Name), "name");
+        content.Add(new StringContent(model.Description ?? ""), "description");
+        content.Add(new StringContent(model.Price.ToString()), "price");
+        content.Add(new StringContent("1"), "categoryId"); // category 1 = schilderijen
+
+        var response = await Http.PostAsync("api/Product/UploadSchilderij", content);
+
+        if (response.IsSuccessStatusCode)
+        {
+            SuccessMessage = "Schilderij succesvol geüpload!";
+            model = new();
+            selectedFile = null;
+        }
+        else
+        {
+            ErrorMessage = "Fout bij uploaden: " + await response.Content.ReadAsStringAsync();
+        }
+    }
+
+    public class ProductUploadModel
+    {
+        [Required]
+        public string Name { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        [Required]
+        public decimal Price { get; set; }
+    }
+}

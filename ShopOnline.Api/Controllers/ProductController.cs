@@ -3,6 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using ShopOnline.Api.Extensions;
 using ShopOnline.Api.Repositories.Contracts;
 using ShopOnline.Models.Dtos;
+using System.IO;
+using System.Net.Mail;
+using System.Net;
+using ShopOnline.Api.Entities;
+using ShopOnline.Api.Data; // Adjust namespace if your DbContext is elsewhere
 
 namespace ShopOnline.Api.Controllers
 {
@@ -11,10 +16,12 @@ namespace ShopOnline.Api.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IProductRepository productRepository;
+        private readonly ShopOnlineDbContext _context; // Add this line
 
-        public ProductController(IProductRepository productRepository)
+        public ProductController(IProductRepository productRepository, ShopOnlineDbContext context) // Add context to constructor
         {
             this.productRepository = productRepository;
+            this._context = context; // Assign context
         }
 
         [HttpGet]
@@ -113,5 +120,70 @@ namespace ShopOnline.Api.Controllers
             }
         }
 
+        [HttpPost("UploadSchilderij")]
+        public async Task<IActionResult> UploadSchilderij([FromForm] IFormFile image, [FromForm] string name, [FromForm] string description, [FromForm] decimal price, [FromForm] int categoryId)
+        {
+            if (image == null || image.Length == 0)
+                return BadRequest("Geen afbeelding ontvangen.");
+
+            var fileName = Path.GetFileName(image.FileName);
+            var savePath = Path.Combine("images", "schilderijen", fileName);
+
+            // Zorg dat de map bestaat
+            Directory.CreateDirectory(Path.GetDirectoryName(savePath)!);
+
+            using (var stream = new FileStream(savePath, FileMode.Create))
+            {
+                await image.CopyToAsync(stream);
+            }
+
+            // Voeg product toe aan database
+            var product = new Product
+            {
+                Name = name,
+                Description = description,
+                Price = price,
+				ImageURL = $"/images/schilderijen/{fileName}",
+                CategoryId = categoryId
+            };
+
+                _context.Products.Add(product);
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        [HttpPost("UploadProduct")]
+        public async Task<IActionResult> UploadProduct([FromForm] IFormFile image, [FromForm] string name, [FromForm] string description, [FromForm] decimal price, [FromForm] int categoryId)
+        {
+            if (image == null || image.Length == 0)
+                return BadRequest("Geen afbeelding ontvangen.");
+
+            var fileName = Path.GetFileName(image.FileName);
+            var savePath = Path.Combine("images", "producten", fileName);
+
+            // Zorg dat de map bestaat
+            Directory.CreateDirectory(Path.GetDirectoryName(savePath)!);
+
+            using (var stream = new FileStream(savePath, FileMode.Create))
+            {
+                await image.CopyToAsync(stream);
+            }
+
+            // Voeg product toe aan database
+            var product = new Product
+            {
+                Name = name,
+                Description = description,
+                Price = price,
+                ImageURL = $"/images/schilderijen/{fileName}",
+                CategoryId = categoryId
+            };
+
+            _context.Products.Add(product);
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
     }
 }
